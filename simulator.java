@@ -24,10 +24,7 @@ public class Building {
         //Running main simulation
         int isCompelte = false;
         while(true){
-            totTime += 0.001;
-            if(){
-
-            }
+            
         }
 
     }
