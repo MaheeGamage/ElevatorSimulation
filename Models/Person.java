@@ -1,5 +1,5 @@
 public class Person {
-    int Floor;
+    int floor;
     double waitTime;
     double totTime;
     double arriveTime;
