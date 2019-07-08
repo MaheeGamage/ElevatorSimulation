@@ -1,3 +1,5 @@
+//package simulator;
+
 public class Person {
     int floor;
     double waitTime;
@@ -5,7 +7,7 @@ public class Person {
     double arriveTime;
     boolean isFinish;
 
-    Person(){
+    public Person(){
         waitTime = 0.0;
         totTime = 0.0;
         isFinish = false;
