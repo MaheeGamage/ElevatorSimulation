@@ -19,7 +19,7 @@ class Building {
     Elevator[] elevators = new Elevator[4];
     final int NumberOfFloors = 10;
 
-    final double[] interFloorDistance = {0.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
+    final double[] interFloorDistance = {10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
     //eg - interFloorDistance[i] = Distance from i-1 floor to i floor
 
     double spendTime;
@@ -54,6 +54,10 @@ class Building {
         elevators[0].showPersons();
         double runTime = elevators[0].run();
         System.out.println("runTime " + runTime);
+
+        for (Person p : queue) {
+            System.out.println("Floor: " + p.floor + ",  waitTime: " + p.waitTime);
+        }
 
         //Running main simulation
         boolean isCompelte = false;
