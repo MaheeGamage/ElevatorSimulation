@@ -1,5 +1,5 @@
 import java.util.Arrays;
-import java.io.*; 
+// import java.io.*; 
 import java.util.*;
 
 public class Elevator {
@@ -22,21 +22,20 @@ public class Elevator {
 
     //floor details
     double[] interFloorDistance;
-    double[] interFloorDistance2;
 
     Elevator(int cap, int NumberOfFloors, double[] interFloorDistance){
-        currentFloor = 0;
-        personCapacity = cap;
-        isTripCompleted = true;
-        elapsedTime = 0.0;
-        interFloorTravelTime = 10.0;
-        floorTravelOrder = new int[NumberOfFloors];
-        interFloorDistance = interFloorDistance;
-        interFloorDistance2 = interFloorDistance;
+        this.currentFloor = 0;
+        this.personCapacity = cap;
+        this.isTripCompleted = true;
+        this.elapsedTime = 0.0;
+        this.interFloorTravelTime = 10.0;
+        this.floorTravelOrder = new int[NumberOfFloors];
+        this.interFloorDistance = interFloorDistance;
+        this.minimumCapacity = 8;
     }
 
     public void addPersons(Person[] persons1){
-        persons1 = persons1;
+        // persons1 = persons1;
         persons = persons1;
         System.out.println("Person[0] " + persons1[0].floor);
     }
@@ -90,7 +89,7 @@ public class Elevator {
             calculatePersonWaitTime(persons, floorTravelOrder[j], elapsedTime);
 
             //calculate number of floor to travel without stop
-            int nextFloor = floorTravelOrder[j];
+            // int nextFloor = floorTravelOrder[j];
             System.out.println("current floor: " + j);
             elapsedTime += calculateTravelTime( floorTravelOrder[j], floorTravelOrder[j+1], accelerate, deaccelerate, constSpeed);
             
@@ -112,7 +111,7 @@ public class Elevator {
         double distance = 0.0;
         System.out.println("currentFloor: "+ currentFloor + ", nextFloor: " + nextFloor);
         for(int k=currentFloor; k<nextFloor; k++){
-            distance += interFloorDistance2[k];
+            distance += interFloorDistance[k];
         }
 
         double time = 0.0;
