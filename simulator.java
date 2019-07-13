@@ -18,7 +18,7 @@ public class simulator {
 
 class Building {
     // Number of Persons
-    Person[] queue = new Person[100];
+    Person[] queue = new Person[1000];
 
     final int NumberOfFloors = 10;
 
@@ -40,18 +40,19 @@ class Building {
     public void run1() {
         // Initializing queue
         Random rand = new Random();
-        for (int i = 0; i < 100; i++) {
-            double arriveTime = i;
+        for (int i = 0; i < 1000; i++) {
+            double arriveTime = i * 5;
             int floor = rand.nextInt(9) + 1;
             Person p = new Person(i, arriveTime, floor);
             queue[i] = p;
         }
 
         // Create elevator set
-        Elevator[] elevators = new Elevator[1];
+        Elevator[] elevators = new Elevator[3];
         int[] allowedFloors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }; // Elevator[0] - allowed floors
         elevators[0] = new Elevator(10, NumberOfFloors, interFloorDistance, allowedFloors, 0);
-        // elevators[1] = new Elevator(10, NumberOfFloors, interFloorDistance, allowedFloors, 1);
+        elevators[1] = new Elevator(10, NumberOfFloors, interFloorDistance, allowedFloors, 1);
+        elevators[2] = new Elevator(10, NumberOfFloors, interFloorDistance, allowedFloors, 2);
 
         // ------------------ Test Code --------------------//
         // elevators[0].addPersons(queue);
@@ -93,23 +94,29 @@ class Building {
             // Event e = eventItr.next();
             Event e = events.get(i);
             simulationTime = e.time;
-            if (e.type == person_arrived)
+            this.spendTime = e.time;
+
+            if (e.type == person_arrived) {
                 sortedInsertPerson(waitingList, e.getPerson());
-            else if (e.type == elevator_arrived) {
+            } else if (e.type == elevator_arrived) {
                 System.out.println("Elevator " + e.e.id + " trip completed");
                 e.e.isTripCompleted = true;
+            } else if (e.type == elevator_leave) {
+                System.out.println("Elevator " + e.e.id + " trip started");
+                // e.e.isTripCompleted = true;
             }
-            // System.out.println();
+
             for (Elevator elevator : elevators) {
-                // System.out.println("Elevator: " + elevator.id + " Trip " + elevator.isTripCompleted);
                 if (elevator.isTripCompleted) { // Check is Elevator available4
 
                     if (waitingList.size() >= elevator.minimumCapacity) {
+
                         // List to add persons to assign to the elevator
                         ArrayList<Person> personElevatorSet = new ArrayList<Person>(elevator.personCapacity);
                         for (Person p : waitingList) { // Iterating through person waiting list
                             for (int floor : elevator.allowedFloors) {
-                                if (p.floor == floor) { // Check the elevator allow to go to person's destination floor
+                                if (p.floor == floor) { // Check the elevator allow to go to person's destination
+                                                        // floor
                                     personElevatorSet.add(p);
                                 }
                                 if (personElevatorSet.size() >= elevator.personCapacity)
@@ -125,12 +132,13 @@ class Building {
                                 person.waitTime = simulationTime - person.arriveTime;
                             }
 
-                            removeFromWaitingList(waitingList, list); // remove persons set to elevator from waitingList
+                            removeFromWaitingList(waitingList, list); // remove persons set to elevator from
+                                                                      // waitingList
 
-                            Event elevatorStart = new Event(simulationTime, elevator_leave, elevator);
+                            Event elevatorStart = new Event(this.spendTime, elevator_leave, elevator);
                             elevator.isTripCompleted = false;
                             double elevatorTravelTime = elevator.run();
-                            double elevatorTravelEndTime = simulationTime + elevatorTravelTime; // Calculate when
+                            double elevatorTravelEndTime = this.spendTime + elevatorTravelTime; // Calculate when
                                                                                                 // elevator
                                                                                                 // comming down
                             Event elevatorEnd = new Event(elevatorTravelEndTime, elevator_arrived, elevator);
@@ -149,8 +157,8 @@ class Building {
             // System.out.println("simulationTime: " + simulationTime);
         }
 
-        //Remaining waiting list
-        System.out.println("Remaining waitingList");
+        // Remaining waiting list
+        System.out.println("Remaining waitingList\n");
         Iterator<Person> itr = waitingList.iterator();
         while (itr.hasNext()) {
             Person e = itr.next();
@@ -160,42 +168,44 @@ class Building {
         double sum = 0.0;
         int count = 0;
         for (Person person : queue) {
-            if(person.isFinish){
+            if (person.isFinish) {
                 sum += person.waitTime;
                 count++;
             }
-            System.out.println("Person id: " + person.id + " waitTime: " + person.waitTime + " isFinish: " + person.isFinish + " arriveTime: " + person.arriveTime + " journeyTime: " + person.journeyTime);
+            System.out.println("Person id: " + person.id + " waitTime: " + person.waitTime + " isFinish: "
+                    + person.isFinish + " arriveTime: " + person.arriveTime + " journeyTime: " + person.journeyTime);
         }
 
-        System.out.println("\naverage waitTime: " + sum/count);
+        System.out.println("\naverage waitTime: " + sum / count);
 
-        //Event list
+        // Event list
         System.out.println("\nEvent List");
         Iterator<Event> eitr = events.iterator();
         while (eitr.hasNext()) {
             Event e = eitr.next();
-    //         static final int person_arrived = 1;
-    // static final int elevator_arrived = 2;
-    // static final int elevator_leave = 3;
+            // static final int person_arrived = 1;
+            // static final int elevator_arrived = 2;
+            // static final int elevator_leave = 3;
             String eType = "NOT type";
-            if(e.type == 1)
-                eType = "person_arrived";
-            else if(e.type == 2)
-                eType = "elevator_arrived";
-            else if(e.type == 3)
-                eType = "elevator_leave"; 
+            if (e.type == 1)
+                eType = "pA";
+            else if (e.type == 2)
+                eType = "eA";
+            else if (e.type == 3)
+                eType = "eL";
 
             String per = "*";
             String elevator = "*";
-            if(e.p != null){
+            if (e.p != null) {
                 per = String.valueOf(e.p.id);
             }
-            if(e.e != null){
+            if (e.e != null) {
                 elevator = String.valueOf(e.e.id);
             }
 
-            if(e.e != null)
-            System.out.println("Event type:" + eType + " time: " + e.time + " per: " + per + " elevator: " + elevator );
+            if (e.e != null)
+                System.out.println(e.e.id + " " + eType + " time: " + e.time);// + " per: " + per + " elevator: " +
+                                                                              // elevator);
         }
     }
 
@@ -235,12 +245,13 @@ class Building {
             list.add(e);
         } else if (list.get(0).time > e.time) {
             list.add(0, e);
-        } else if (list.get(list.size() - 1).time < e.time) {
+        } else if (list.get(list.size() - 1).time <= e.time) {
             list.add(list.size(), e);
         } else {
             int i = 0;
-            while (list.get(i).time < e.time) {
+            while (list.get(i).time <= e.time) {
                 i++;
+
             }
             list.add(i, e);
         }
