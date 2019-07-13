@@ -17,7 +17,9 @@ public class simulator {
 }
 
 class Building {
-    Person[] queue = new Person[10];
+    // Number of Persons
+    Person[] queue = new Person[100];
+
     final int NumberOfFloors = 10;
 
     // Defining the distance between 2 floors
@@ -38,16 +40,18 @@ class Building {
     public void run1() {
         // Initializing queue
         Random rand = new Random();
-        for (int i = 0; i < 10; i++) {
-            Person p = new Person();
-            p.arriveTime = i * 10;
-            p.floor = rand.nextInt(9) + 1;
+        for (int i = 0; i < 100; i++) {
+            double arriveTime = i;
+            int floor = rand.nextInt(9) + 1;
+            Person p = new Person(i, arriveTime, floor);
             queue[i] = p;
         }
 
         // Create elevator set
         Elevator[] elevators = new Elevator[1];
-        elevators[0] = new Elevator(10, NumberOfFloors, interFloorDistance);
+        int[] allowedFloors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }; // Elevator[0] - allowed floors
+        elevators[0] = new Elevator(10, NumberOfFloors, interFloorDistance, allowedFloors, 0);
+        // elevators[1] = new Elevator(10, NumberOfFloors, interFloorDistance, allowedFloors, 1);
 
         // ------------------ Test Code --------------------//
         // elevators[0].addPersons(queue);
@@ -60,42 +64,151 @@ class Building {
         // }
         // -------------------------------------------------//
 
+        // Main event list
+        ArrayList<Event> events = new ArrayList<Event>();
+
         // Add person queue to event list
-        LinkedList<Event> events = new LinkedList<Event>();
         for (Person p : queue) {
             Event e = new Event(p.arriveTime, person_arrived, p);
-            sortedInsertEvent(events, e);
+            events.add(e);
+            // sortedInsertEvent(events, e);
         }
+
+        // -------------------- Test Code -------------------/
+        // for (Event e : events) {
+        // System.out.println("Person: " +e.p.id +" floor: " + e.p.floor + " arriveTime:
+        // " + e.p.arriveTime);
+        // }
+        // ----------------------- End -----------------------/
 
         // Waiting persons list
         LinkedList<Person> waitingList = new LinkedList<Person>();
 
+        // ListIterator<Event> eventItr = events.listIterator();
+        double simulationTime = 0.0;
         // Running main simulation
-        Iterator<Event> eventItr = events.iterator();
+        // while (eventItr.hasNext()) {
 
-        while (eventItr.hasNext()) {
-            Event e = eventItr.next();
+        for (int i = 0; i < events.size(); i++) {
+            // Event e = eventItr.next();
+            Event e = events.get(i);
+            simulationTime = e.time;
             if (e.type == person_arrived)
                 sortedInsertPerson(waitingList, e.getPerson());
-            
+            else if (e.type == elevator_arrived) {
+                System.out.println("Elevator " + e.e.id + " trip completed");
+                e.e.isTripCompleted = true;
+            }
+            // System.out.println();
             for (Elevator elevator : elevators) {
-                if(elevator.isTripCompleted){
-                    if(elevator.minimumCapacity <= waitingList.size()){
-                        
+                // System.out.println("Elevator: " + elevator.id + " Trip " + elevator.isTripCompleted);
+                if (elevator.isTripCompleted) { // Check is Elevator available4
+
+                    if (waitingList.size() >= elevator.minimumCapacity) {
+                        // List to add persons to assign to the elevator
+                        ArrayList<Person> personElevatorSet = new ArrayList<Person>(elevator.personCapacity);
+                        for (Person p : waitingList) { // Iterating through person waiting list
+                            for (int floor : elevator.allowedFloors) {
+                                if (p.floor == floor) { // Check the elevator allow to go to person's destination floor
+                                    personElevatorSet.add(p);
+                                }
+                                if (personElevatorSet.size() >= elevator.personCapacity)
+                                    break;
+                            }
+                        }
+                        if (personElevatorSet.size() >= elevator.minimumCapacity) {
+                            Person[] list = new Person[personElevatorSet.size()];
+                            personElevatorSet.toArray(list);
+                            elevator.addPersons(list); // Add selected Persons to elevator
+
+                            for (Person person : list) {
+                                person.waitTime = simulationTime - person.arriveTime;
+                            }
+
+                            removeFromWaitingList(waitingList, list); // remove persons set to elevator from waitingList
+
+                            Event elevatorStart = new Event(simulationTime, elevator_leave, elevator);
+                            elevator.isTripCompleted = false;
+                            double elevatorTravelTime = elevator.run();
+                            double elevatorTravelEndTime = simulationTime + elevatorTravelTime; // Calculate when
+                                                                                                // elevator
+                                                                                                // comming down
+                            Event elevatorEnd = new Event(elevatorTravelEndTime, elevator_arrived, elevator);
+
+                            // Adding elevatorStart and elevatorEnd Events to Main Event List
+                            sortedInsertEvent(events, elevatorStart);
+                            sortedInsertEvent(events, elevatorEnd);
+
+                            System.out.println("runTime " + elevatorTravelEndTime + "\n");
+                        }
                     }
                 }
             }
 
             // sort after adding
-            System.out.println("etime: " + e.time);
+            // System.out.println("simulationTime: " + simulationTime);
         }
 
+        //Remaining waiting list
+        System.out.println("Remaining waitingList");
         Iterator<Person> itr = waitingList.iterator();
         while (itr.hasNext()) {
             Person e = itr.next();
             System.out.println(e.arriveTime);
         }
 
+        double sum = 0.0;
+        int count = 0;
+        for (Person person : queue) {
+            if(person.isFinish){
+                sum += person.waitTime;
+                count++;
+            }
+            System.out.println("Person id: " + person.id + " waitTime: " + person.waitTime + " isFinish: " + person.isFinish + " arriveTime: " + person.arriveTime + " journeyTime: " + person.journeyTime);
+        }
+
+        System.out.println("\naverage waitTime: " + sum/count);
+
+        //Event list
+        System.out.println("\nEvent List");
+        Iterator<Event> eitr = events.iterator();
+        while (eitr.hasNext()) {
+            Event e = eitr.next();
+    //         static final int person_arrived = 1;
+    // static final int elevator_arrived = 2;
+    // static final int elevator_leave = 3;
+            String eType = "NOT type";
+            if(e.type == 1)
+                eType = "person_arrived";
+            else if(e.type == 2)
+                eType = "elevator_arrived";
+            else if(e.type == 3)
+                eType = "elevator_leave"; 
+
+            String per = "*";
+            String elevator = "*";
+            if(e.p != null){
+                per = String.valueOf(e.p.id);
+            }
+            if(e.e != null){
+                elevator = String.valueOf(e.e.id);
+            }
+
+            if(e.e != null)
+            System.out.println("Event type:" + eType + " time: " + e.time + " per: " + per + " elevator: " + elevator );
+        }
+    }
+
+    private static void removeFromWaitingList(LinkedList<Person> waitingList, Person[] elevatorList) {
+        for (Iterator<Person> iter = waitingList.iterator(); iter.hasNext();) {
+            Person waitingListPerson = iter.next();
+            for (Person elevatorListPerson : elevatorList) {
+                if (elevatorListPerson.id == waitingListPerson.id) {
+                    iter.remove();
+                    break;
+                }
+            }
+        }
     }
 
     private static void sortedInsertPerson(LinkedList<Person> list, Person p) {
@@ -116,7 +229,7 @@ class Building {
 
     }
 
-    private static void sortedInsertEvent(LinkedList<Event> list, Event e) {
+    private static void sortedInsertEvent(ArrayList<Event> list, Event e) {
 
         if (list.size() == 0) {
             list.add(e);
