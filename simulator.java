@@ -17,42 +17,76 @@ public class simulator {
 }
 
 class Building {
-    // Number of Persons
-    Person[] queue = new Person[1000];
-
+    final int NumberOfPersons = 300;
     final int NumberOfFloors = 10;
+    final int MAX_ARRIVE_TIME = 900; //in seconds
+
+    // Number of Persons
+    Person[] queue = new Person[NumberOfPersons];
 
     // Defining the distance between 2 floors
-    final double[] interFloorDistance = { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
+    final double[] interFloorDistance = new double[NumberOfFloors];// { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0,
+                                                                   // 18.0 };
+    // List begin in distance to first floor(1) to base Floor(0)
     // eg - interFloorDistance[i] = Distance from i-1 floor to i floor
+
+    // Create elevator set
+    Elevator[] elevators;
 
     // Event type specification
     static final int person_arrived = 1;
     static final int elevator_arrived = 2;
     static final int elevator_leave = 3;
 
-    double spendTime;
+    double spendTime; // Total Simulation time
 
     Building() {
         spendTime = 0.0;
+
+        
+        int NumberOfElevators = 4;
+        elevators = new Elevator[NumberOfElevators];
+        // Elevator(Maximum_capacity, Number_of_Floors_in_the_building,
+        // Inter_Floor_Distance, Aloowed_floors, ID)
+        elevators[0] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 10), 0);
+        elevators[1] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 10), 1);
+        elevators[2] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 10), 2);
+        elevators[3] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 10), 3);
+        // elevators[4] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 10), 4);
+        // elevators[5] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 10), 5);
+        // elevators[6] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 10), 6);
+        // elevators[7] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 10), 7);
+
+
     }
 
     public void run1() {
+
+        // Create Inter floor distance
+        for (int f = 0; f < NumberOfFloors; f++) {
+            interFloorDistance[f] = 4; // Distance between 2 floors
+        }
+
         // Initializing queue
         Random rand = new Random();
-        for (int i = 0; i < 1000; i++) {
-            double arriveTime = i * 5;
-            int floor = rand.nextInt(9) + 1;
-            Person p = new Person(i, arriveTime, floor);
+        for (int i = 0; i < NumberOfPersons; i++) {
+            double arriveTime =  1;//MAX_ARRIVE_TIME * rand.nextDouble();
+            int floor = rand.nextInt(NumberOfFloors) + 1;
+            Person p = new Person(i, arriveTime, floor); // Person(id, arrive_Time, Floor)
             queue[i] = p;
         }
 
-        // Create elevator set
-        Elevator[] elevators = new Elevator[3];
-        int[] allowedFloors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }; // Elevator[0] - allowed floors
-        elevators[0] = new Elevator(10, NumberOfFloors, interFloorDistance, allowedFloors, 0);
-        elevators[1] = new Elevator(10, NumberOfFloors, interFloorDistance, allowedFloors, 1);
-        elevators[2] = new Elevator(10, NumberOfFloors, interFloorDistance, allowedFloors, 2);
+        // // Create elevator set
+        // Elevator[] elevators = new Elevator[2];
+        // // int[] allowedFloors = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }; // Elevator[0]
+        // - allowed floors
+
+        // Elevator(Maximum_capacity, Number_of_Floors_in_the_building,
+        // Inter_Floor_Distance, Aloowed_floors, ID)
+        // elevators[0] = new Elevator(10, NumberOfFloors, interFloorDistance,
+        // generateAllowedFloor(1,10), 0);
+        // elevators[1] = new Elevator(10, NumberOfFloors, interFloorDistance,
+        // generateAllowedFloor(1,10), 1);
 
         // ------------------ Test Code --------------------//
         // elevators[0].addPersons(queue);
@@ -71,8 +105,8 @@ class Building {
         // Add person queue to event list
         for (Person p : queue) {
             Event e = new Event(p.arriveTime, person_arrived, p);
-            events.add(e);
-            // sortedInsertEvent(events, e);
+            // events.add(e);
+            sortedInsertEvent(events, e);
         }
 
         // -------------------- Test Code -------------------/
@@ -110,7 +144,7 @@ class Building {
                 if (elevator.isTripCompleted) { // Check is Elevator available4
 
                     if (waitingList.size() >= elevator.minimumCapacity) {
-
+                        boolean elevatorFull = false;
                         // List to add persons to assign to the elevator
                         ArrayList<Person> personElevatorSet = new ArrayList<Person>(elevator.personCapacity);
                         for (Person p : waitingList) { // Iterating through person waiting list
@@ -119,9 +153,13 @@ class Building {
                                                         // floor
                                     personElevatorSet.add(p);
                                 }
-                                if (personElevatorSet.size() >= elevator.personCapacity)
+                                if (personElevatorSet.size() >= elevator.personCapacity) {
+                                    elevatorFull = true;
                                     break;
+                                }
                             }
+                            if(elevatorFull)
+                                break;
                         }
                         if (personElevatorSet.size() >= elevator.minimumCapacity) {
                             Person[] list = new Person[personElevatorSet.size()];
@@ -129,15 +167,15 @@ class Building {
                             elevator.addPersons(list); // Add selected Persons to elevator
 
                             for (Person person : list) {
-                                person.waitTime = simulationTime - person.arriveTime;
+                                person.waitTime = this.spendTime - person.arriveTime;
                             }
 
-                            removeFromWaitingList(waitingList, list); // remove persons set to elevator from
+                            removeFromWaitingList(waitingList, list); // remove persons_elevator_set from
                                                                       // waitingList
 
                             Event elevatorStart = new Event(this.spendTime, elevator_leave, elevator);
                             elevator.isTripCompleted = false;
-                            double elevatorTravelTime = elevator.run();
+                            double elevatorTravelTime = elevator.run(); // Get Elevator Total journey Time
                             double elevatorTravelEndTime = this.spendTime + elevatorTravelTime; // Calculate when
                                                                                                 // elevator
                                                                                                 // comming down
@@ -147,7 +185,7 @@ class Building {
                             sortedInsertEvent(events, elevatorStart);
                             sortedInsertEvent(events, elevatorEnd);
 
-                            System.out.println("runTime " + elevatorTravelEndTime + "\n");
+                            System.out.println("runTime " + elevatorTravelTime + "\n");
                         }
                     }
                 }
@@ -165,18 +203,21 @@ class Building {
             System.out.println(e.arriveTime);
         }
 
-        double sum = 0.0;
+        double waitTimeSum = 0.0;
+        double journeyTimeSum = 0.0;
         int count = 0;
         for (Person person : queue) {
             if (person.isFinish) {
-                sum += person.waitTime;
+                waitTimeSum += person.waitTime;
+                journeyTimeSum += person.journeyTime;
                 count++;
             }
             System.out.println("Person id: " + person.id + " waitTime: " + person.waitTime + " isFinish: "
                     + person.isFinish + " arriveTime: " + person.arriveTime + " journeyTime: " + person.journeyTime);
         }
-
-        System.out.println("\naverage waitTime: " + sum / count);
+        double averageWaitTime = waitTimeSum / count;
+        double averageJourneyTime = journeyTimeSum / count;
+        double averageTotalTime = (waitTimeSum + journeyTimeSum)/ count;
 
         // Event list
         System.out.println("\nEvent List");
@@ -203,10 +244,25 @@ class Building {
                 elevator = String.valueOf(e.e.id);
             }
 
+            // System.out.println(eType + " time: " + e.time + " per: " + per + " elevator:
+            // " + elevator);
+
             if (e.e != null)
                 System.out.println(e.e.id + " " + eType + " time: " + e.time);// + " per: " + per + " elevator: " +
                                                                               // elevator);
         }
+
+        System.out.println("\naverage waitTime: " + averageWaitTime);
+        System.out.println("average journeyTime: " + averageJourneyTime);
+        System.out.println("average totalTime: " + averageTotalTime);
+    }
+
+    private static int[] generateAllowedFloor(int minFloor, int maxFloor) {
+        int[] arr = new int[maxFloor - minFloor + 1];
+        for (int i = 0; i <= maxFloor - minFloor; i++)
+            arr[i] = i + minFloor;
+
+        return arr;
     }
 
     private static void removeFromWaitingList(LinkedList<Person> waitingList, Person[] elevatorList) {

@@ -21,7 +21,13 @@ public class Elevator {
     // Accelerate, Deaccelerate, const speed variables
     double accelerate = 1;
     double deaccelerate = 1;
-    double constSpeed = 2;
+    double constSpeed = 2.5;
+
+    // Elevator Door Open, Close, wait etc Times
+    double doorOpenTime = 1.9;
+    double doorCloseTime = 2.8;
+    double startDelay = 0.5;
+    double passengerTransferTime = 1.2;
 
     // floor details
     double[] interFloorDistance;
@@ -33,7 +39,7 @@ public class Elevator {
         this.elapsedTime = 0.0;
         this.interFloorTravelTime = 10.0;
         this.interFloorDistance = interFloorDistance;
-        this.minimumCapacity = 8;
+        this.minimumCapacity = 21;
         this.allowedFloors = allowedFloors;
         this.id = id;
     }
@@ -44,7 +50,7 @@ public class Elevator {
 
     public void addPersons(Person[] persons) {
         this.persons = persons;
-        // System.out.println("Person[0] " + persons[0].floor);
+        // System.out.println("No of Persons " + persons.length);
     }
 
     public void showPersons() {
@@ -62,7 +68,7 @@ public class Elevator {
         int i = 0;
 
         // System.out.println("floorTravelOrder :" + floorTravelOrder.length);
-        System.out.println("In elevator :" + this.id);
+        
 
         for (Person p : persons) {
             // System.out.println("In Elevator "+ this.id + " - Person: " + p.id + " floor: " + p.floor + " arriveTime: " + p.arriveTime);
@@ -74,9 +80,11 @@ public class Elevator {
         int l = removeDuplicateElements(floorTravelOrder, floorTravelOrder.length);
         // removeDuplicates(floorTravelOrder);
 
+        System.out.println("In elevator :" + this.id);// + "No of P: " + persons.length);
         int[] newArray = new int[l];
         for (int j = 0; j < l; j++) {
             newArray[j] = floorTravelOrder[j];
+            System.out.print(floorTravelOrder[j]);// + "No of P: " + persons.length);
         }
 
         floorTravelOrder = newArray;
@@ -86,6 +94,8 @@ public class Elevator {
         //     System.out.println("floor " + f);
         // }
 
+        
+
         // System.out.println("NO of Floors: " + floorTravelOrder.length);
         double tempTime = 0.0;
         for (int j = 0; j < floorTravelOrder.length - 1; j++) {
@@ -93,7 +103,7 @@ public class Elevator {
             if (j == 0) {
                 // First stop floor travel time
                 // System.out.println("inside travel floor j==0");
-                tempTime = calculateTravelTime(0, floorTravelOrder[j], accelerate, deaccelerate, constSpeed);
+                tempTime = calculateTravelTime(0, floorTravelOrder[j], persons);
                 elapsedTime += tempTime;
 
             }
@@ -103,8 +113,7 @@ public class Elevator {
             // calculate number of floor to travel without stop
             // int nextFloor = floorTravelOrder[j];
             // System.out.println("current floor: " + j);
-            elapsedTime += calculateTravelTime(floorTravelOrder[j], floorTravelOrder[j + 1], accelerate, deaccelerate,
-                    constSpeed);
+            elapsedTime += calculateTravelTime(floorTravelOrder[j], floorTravelOrder[j + 1], persons);
 
             if (j == floorTravelOrder.length - 2) {
                 // Calculate personal journeyTime
@@ -112,7 +121,7 @@ public class Elevator {
 
                 // go to base floor
                 // System.out.println("inside final floor");
-                elapsedTime += calculateTravelTime(0, floorTravelOrder[j + 1], accelerate, deaccelerate, constSpeed);
+                elapsedTime += calculateTravelTime(0, floorTravelOrder[j + 1], new Person[0]);
             }
         }
 
@@ -124,22 +133,40 @@ public class Elevator {
         return elapsedTime;
     }
 
-    double calculateTravelTime(int currentFloor, int nextFloor, double acc, double deacc, double speed) {
+    double calculateTravelTime(int currentFloor, int nextFloor, Person[] persons) {
 
         double distance = 0.0;
         double time = 0.0;
+        time += doorOpenTime + doorCloseTime + startDelay;
+        
+        //Calculate Passenger Transfer Time
+        if(persons.length == 0){
+            if(currentFloor == 0)
+                time += passengerTransferTime*persons.length; 
+            else{
+                int count = 0;
+                for (Person p : persons) {
+                    if (p.floor == currentFloor)
+                        count++;
+                }
+                time += passengerTransferTime*count; 
+            }
+        }
+
         if (currentFloor != nextFloor) {
             // System.out.println("currentFloor: " + currentFloor + ", nextFloor: " + nextFloor);
             for (int k = currentFloor; k < nextFloor; k++) {
                 distance += interFloorDistance[k];
             }
 
-            double accTime = speed / acc;
-            double deaccTime = speed / deacc;
-            double accDistance = 0.5 * acc * accTime * accTime;
-            double deaccDistance = 0.5 * deacc * deaccTime * deaccTime;
-            double constSpeedTime = (distance - (accDistance + deaccDistance)) / speed;
-            time = accTime + constSpeedTime + deaccTime;
+            // System.out.println("CF: " + currentFloor + " NF:" + nextFloor + " D: " + distance);
+
+            double accTime = this.constSpeed / this.accelerate;
+            double deaccTime = this.constSpeed / this.deaccelerate;
+            double accDistance = 0.5 * this.accelerate * accTime * accTime;
+            double deaccDistance = 0.5 * this.deaccelerate * deaccTime * deaccTime;
+            double constSpeedTime = (distance - (accDistance + deaccDistance)) / this.constSpeed;
+            time += accTime + constSpeedTime + deaccTime;
         }
         // System.out.println("distance: " + distance + ",  time: " + time);
         // System.out.println();
