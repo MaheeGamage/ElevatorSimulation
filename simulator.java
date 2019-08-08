@@ -70,7 +70,7 @@ class Building {
         // Initializing queue
         Random rand = new Random();
         for (int i = 0; i < NumberOfPersons; i++) {
-            double arriveTime =  1;//MAX_ARRIVE_TIME * rand.nextDouble();
+            double arriveTime =  MAX_ARRIVE_TIME * rand.nextDouble();
             int floor = rand.nextInt(NumberOfFloors) + 1;
             Person p = new Person(i, arriveTime, floor); // Person(id, arrive_Time, Floor)
             queue[i] = p;
@@ -200,7 +200,7 @@ class Building {
         Iterator<Person> itr = waitingList.iterator();
         while (itr.hasNext()) {
             Person e = itr.next();
-            System.out.println(e.arriveTime);
+            System.out.println("Arrive Time: " + e.arriveTime);
         }
 
         double waitTimeSum = 0.0;
