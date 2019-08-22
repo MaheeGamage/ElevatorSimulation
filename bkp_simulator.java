@@ -4,7 +4,7 @@
 import java.util.*;
 import java.util.Random;
 
-public class simulator {
+public class bkp_simulator {
 
     public static void main(String[] args) {
 
@@ -30,8 +30,8 @@ class Building {
     // List begin in distance to first floor(1) to base Floor(0)
     // eg - interFloorDistance[i] = Distance from i-1 floor to i floor
 
-    // Defining percentage of people go to each floor
-    final int[] FLOOR_WEIGHTS = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 55 }; // Sum of all element should be 100
+    //Defining percentage of people go to each floor
+    final int[] FLOOR_WEIGHTS = {5,5,5,5,5,5,5,5,5,55}; // Sum of all element should be 100
 
     // Create elevator set
     Elevator[] elevators;
@@ -41,14 +41,11 @@ class Building {
     static final int elevator_arrived = 2;
     static final int elevator_leave = 3;
 
-    //Lift Waiting time for next person
-    static final double WAIT_FOR_NEXT_PERSON = 5.0;
-
     double spendTime; // Total Simulation time
 
     Building() {
         spendTime = 0.0;
-
+        
         int NumberOfElevators = 2;
         elevators = new Elevator[NumberOfElevators];
         // Elevator(Maximum_capacity, Number_of_Floors_in_the_building,
@@ -58,8 +55,7 @@ class Building {
         // generateAllowedFloor(1, 10), 1);
         // elevators[2] = new Elevator(26, NumberOfFloors, interFloorDistance,
         // generateAllowedFloor(1, 10), 2);
-        elevators[1] = new Elevator(26, NumberOfFloors, interFloorDistance, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
-                1);
+        elevators[1] = new Elevator(26, NumberOfFloors, interFloorDistance, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },1);
         // elevators[4] = new Elevator(26, NumberOfFloors, interFloorDistance,
         // generateAllowedFloor(1, 10), 4);
         // elevators[5] = new Elevator(26, NumberOfFloors, interFloorDistance,
@@ -193,28 +189,10 @@ class Building {
                 // e.e.isTripCompleted = true;
             }
 
-            //Check next person arriveTime
-            boolean isNextPerson = false;
-            for(int j=i+1; j<events.size(); j++){
-                Event nextEvent = events.get(j);
-                if(nextEvent.p!=null){
-                    double timeToNext = nextEvent.time - e.time;
-                    if(timeToNext <= WAIT_FOR_NEXT_PERSON){
-                        isNextPerson =true;
-                        break;
-                    }
-                    else{
-                        isNextPerson =false;
-                        break;
-                    }
-                }
-            }
-
-
             for (Elevator elevator : elevators) {
                 if (elevator.isTripCompleted) { // Check is Elevator available4
 
-                    // if (waitingList.size() >= elevator.minimumCapacity) {
+                    if (waitingList.size() >= elevator.minimumCapacity) {
                         boolean elevatorFull = false;
                         // List to add persons to assign to the elevator
                         ArrayList<Person> personElevatorSet = new ArrayList<Person>(elevator.personCapacity);
@@ -232,9 +210,7 @@ class Building {
                             if (elevatorFull)
                                 break;
                         }
-
-                        if ((elevatorFull || !isNextPerson) && (waitingList.size()>0)) {
-                            // System.out.println("waiting list size: " + waitingList.size()+ " elevatorFull: " + elevatorFull + " isNextPerson: " + isNextPerson);
+                        if (personElevatorSet.size() >= elevator.minimumCapacity) {
                             Person[] list = new Person[personElevatorSet.size()];
                             personElevatorSet.toArray(list);
                             elevator.addPersons(list); // Add selected Persons to elevator
@@ -260,7 +236,7 @@ class Building {
 
                             System.out.println("runTime " + elevatorTravelTime + "\n");
                         }
-                    // }
+                    }
                 }
             }
 
@@ -350,11 +326,11 @@ class Building {
         return arr;
     }
 
-    // Generate inter floor distance in same distance pattern
+    //Generate inter floor distance in same distance pattern
     private static double[] generateInterFloorDistance(int floors, int distance) {
-        double[] list = new double[floors - 1];
+        double[] list = new double[floors-1];
         for (int i = 0; i < list.length; i++)
-            list[i] = i * 10;
+            list[i] = i*10;
 
         return list;
     }
@@ -407,16 +383,16 @@ class Building {
 
     }
 
-    public static Person[] SuffleArray(Person[] array) {
-        Random rgen = new Random(); // Random number generator
-
-        for (int i = 0; i < array.length; i++) {
-            int randomPosition = rgen.nextInt(array.length);
-            Person temp = array[i];
-            array[i] = array[randomPosition];
-            array[randomPosition] = temp;
-        }
-
-        return array;
-    }
+    public static Person[] SuffleArray(Person[] array){
+		Random rgen = new Random();  // Random number generator			
+ 
+		for (int i=0; i<array.length; i++) {
+		    int randomPosition = rgen.nextInt(array.length);
+		    Person temp = array[i];
+		    array[i] = array[randomPosition];
+		    array[randomPosition] = temp;
+		}
+ 
+		return array;
+	}
 }
