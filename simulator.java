@@ -348,6 +348,18 @@ class Building {
             }
         }
 
+        System.out.println("\nFloor Person");
+        int[] floorCapacity = new int[NumberOfFloors];
+        for (int i=0; i < floorCapacity.length ; i++){
+            floorCapacity[i] = 0;
+        }
+        for (int i=0; i < queue.length ; i++){
+            floorCapacity[queue[i].floor - 1]++;
+        }
+        for (int i=0; i < floorCapacity.length ; i++){
+            System.out.println("Floor: " + (i+1) + " Capacity: " + floorCapacity[i]);
+        }        
+
         System.out.println("\naverage waitTime: " + averageWaitTime);
         System.out.println("average journeyTime: " + averageJourneyTime);
         System.out.println("average totalTime: " + averageTotalTime);
