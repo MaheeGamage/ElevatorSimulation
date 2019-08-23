@@ -31,7 +31,7 @@ class Building {
     // eg - interFloorDistance[i] = Distance from i-1 floor to i floor
 
     // Defining percentage of people go to each floor
-    final int[] FLOOR_WEIGHTS = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 55 }; // Sum of all element should be 100
+    final int[] FLOOR_WEIGHTS = { 55, 5, 5, 5, 5, 5, 5, 5, 5, 5 }; // Sum of all element should be 100
 
     // Create elevator set
     Elevator[] elevators;
@@ -41,7 +41,7 @@ class Building {
     static final int elevator_arrived = 2;
     static final int elevator_leave = 3;
 
-    //Lift Waiting time for next person
+    //Elevator Waiting time for next person
     static final double WAIT_FOR_NEXT_PERSON = 5.0;
 
     double spendTime; // Total Simulation time
@@ -246,7 +246,7 @@ class Building {
                             removeFromWaitingList(waitingList, list); // remove persons_elevator_set from
                                                                       // waitingList
 
-                            Event elevatorStart = new Event(this.spendTime, elevator_leave, elevator);
+                            Event elevatorStart = new Event(this.spendTime, elevator_leave, elevator, list.length);
                             elevator.isTripCompleted = false;
                             double elevatorTravelTime = elevator.run(); // Get Elevator Total journey Time
                             double elevatorTravelEndTime = this.spendTime + elevatorTravelTime; // Calculate when
@@ -269,24 +269,31 @@ class Building {
         }
 
         // Remaining waiting list
-        System.out.println("Remaining waitingList");
-        Iterator<Person> itr = waitingList.iterator();
-        while (itr.hasNext()) {
-            Person e = itr.next();
-            System.out.println("Arrive Time: " + e.arriveTime);
-        }
+        // System.out.println("\nRemaining waitingList");
+        // Iterator<Person> itr = waitingList.iterator();
+        // while (itr.hasNext()) {
+        //     Person e = itr.next();
+        //     System.out.println("Arrive Time: " + e.arriveTime);
+        // }
 
+        System.out.println("\nPerson Queue");
+        LinkedList<Person> sortedPersonList = new LinkedList<Person>();
+        for (Person person : queue) {
+            sortedInsertPerson(sortedPersonList, person);
+        }
+        
         double waitTimeSum = 0.0;
         double journeyTimeSum = 0.0;
         int count = 0;
-        for (Person person : queue) {
+        for (Person person : sortedPersonList) {
             if (person.isFinish) {
                 waitTimeSum += person.waitTime;
                 journeyTimeSum += person.journeyTime;
                 count++;
             }
-            System.out.println("Person id: " + person.id + " waitTime: " + person.waitTime + " isFinish: "
+            System.out.println("Person id: " + person.id + " Floor: " + person.floor + " waitTime: " 
                     + person.isFinish + " arriveTime: " + person.arriveTime + " journeyTime: " + person.journeyTime);
+                //+ person.waitTime + " isFinish: "
         }
         double averageWaitTime = waitTimeSum / count;
         double averageJourneyTime = journeyTimeSum / count;
@@ -328,13 +335,17 @@ class Building {
             // " + elevator);
 
             //Show people events in event list
-            if (e.p != null)
-                System.out.println("P " + e.p.id + " " + "floor: " + e.p.floor + " ArriveTime: " + e.p.arriveTime);
+            // if (e.p != null)
+            //     System.out.println("P " + e.p.id + " " + "floor: " + e.p.floor + " ArriveTime: " + e.p.arriveTime);
 
             //Show elevator events in event list
-            if (e.e != null)
-                System.out.println("E " + e.e.id + " " + eType + " time: " + e.time);// + " per: " + per + " elevator: " +
+            if (e.e != null){
+                String elevatorCarrySize = " ";
+                if(e.numberOfPeople != 0)
+                    elevatorCarrySize =  " #ofPersons: " + e.numberOfPeople;
+                System.out.println("E " + e.e.id + " " + eType + " time: " + e.time + elevatorCarrySize );// + " per: " + per + " elevator: " +
                                                                               // elevator);
+            }
         }
 
         System.out.println("\naverage waitTime: " + averageWaitTime);
