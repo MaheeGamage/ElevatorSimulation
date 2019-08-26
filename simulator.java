@@ -49,14 +49,14 @@ class Building {
     Building() {
         spendTime = 0.0;
 
-        int NumberOfElevators = 1;
+        int NumberOfElevators = 3;
         elevators = new Elevator[NumberOfElevators];
 
         // Elevator(Maximum_capacity, Number_of_Floors_in_the_building,
         // Inter_Floor_Distance, Aloowed_floors, ID)
         elevators[0] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 5), 0);
-        //elevators[1] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(6, 10), 1);
-        //elevators[2] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(1, 10), 2);
+        elevators[1] = new Elevator(26, NumberOfFloors, interFloorDistance, generateAllowedFloor(6, 10), 1);
+        elevators[2] = new Elevator(26, NumberOfFloors, interFloorDistance,  new int[] {1,2,3,4,5,6,7,8,9,10} , 2);
         
 
     }
