@@ -11,6 +11,7 @@ public class Elevator {
     boolean isTripCompleted;
     double interFloorTravelTime;
     int[] floorTravelOrder;
+    int numberOfStops;
 
     double remainTime;
     double elapsedTime;
@@ -42,6 +43,7 @@ public class Elevator {
         this.minimumCapacity = 21;
         this.allowedFloors = allowedFloors;
         this.id = id;
+        this.numberOfStops = 0;
     }
 
     public void setID(int id){
@@ -88,13 +90,13 @@ public class Elevator {
         }
 
         floorTravelOrder = newArray;
+        numberOfStops = floorTravelOrder.length;
 
         // System.out.println("Sorted floor list");
         // for (int f : floorTravelOrder) {
         //     System.out.println("floor " + f);
         // }
 
-        
 
         // System.out.println("NO of Floors: " + floorTravelOrder.length);
         double tempTime = 0.0;

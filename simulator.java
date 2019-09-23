@@ -285,8 +285,8 @@ class Building {
                 journeyTimeSum += person.journeyTime;
                 count++;
             }
-            System.out.println("Person id: " + person.id + " Floor: " + person.floor + " waitTime: " + person.isFinish
-                    + " arriveTime: " + person.arriveTime + " journeyTime: " + person.journeyTime);
+            System.out.println("Person id: " + person.id + " |Floor: " + person.floor + " |waitTime: " + person.waitTime
+                    + " |arriveTime: " + person.arriveTime + " |journeyTime: " + person.journeyTime);
             // + person.waitTime + " isFinish: "
         }
         double averageWaitTime = waitTimeSum / count;
@@ -339,7 +339,7 @@ class Building {
                 String elevatorCarrySize = " ";
                 if (e.numberOfPeople != 0)
                     elevatorCarrySize = " #ofPersons: " + e.numberOfPeople;
-                System.out.println("E " + e.e.id + " " + eType + " time: " + e.time + elevatorCarrySize);// + " per: " +
+                System.out.println("E " + e.e.id + " " + eType + " time: " + e.time + elevatorCarrySize + " Stops: " + e.e.numberOfStops);// + " per: " +
                                                                                                          // per + "
                                                                                                          // elevator: "
                                                                                                          // +
