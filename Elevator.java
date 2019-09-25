@@ -33,6 +33,21 @@ public class Elevator {
     // floor details
     double[] interFloorDistance;
 
+    Elevator(int id ) {
+        this.id = id;
+    }
+
+    Elevator(int id, int numberOfStops) {
+        this.id = id;
+        this.numberOfStops = numberOfStops;
+    }
+
+    Elevator(int id, int numberOfStops, Person[] persons) {
+        this.id = id;
+        this.numberOfStops = numberOfStops;
+        this.persons = persons;
+    }
+
     Elevator(int cap, int NumberOfFloors, double[] interFloorDistance, int[] allowedFloors, int id) {
         this.currentFloor = 0;
         this.personCapacity = cap;
@@ -61,6 +76,7 @@ public class Elevator {
 
     public double run() {
         elapsedTime = 0.0;
+        numberOfStops = 0;
         this.floorTravelOrder = new int[this.personCapacity];
         for(int i=0; i < floorTravelOrder.length ; i++){
             floorTravelOrder[i]= 0;
@@ -82,7 +98,7 @@ public class Elevator {
         int l = removeDuplicateElements(floorTravelOrder, floorTravelOrder.length);
         // removeDuplicates(floorTravelOrder);
 
-        System.out.println("In elevator :" + this.id);// + "No of P: " + persons.length);
+        System.out.println("In elevator :" + this.id + "No of P: " + persons.length);
         int[] newArray = new int[l];
         for (int j = 0; j < l; j++) {
             newArray[j] = floorTravelOrder[j];
@@ -90,8 +106,12 @@ public class Elevator {
         }
 
         floorTravelOrder = newArray;
-        numberOfStops = floorTravelOrder.length;
 
+        for (int floor : floorTravelOrder) {
+            if(floor != 0)
+                numberOfStops++;
+        }
+        
         // System.out.println("Sorted floor list");
         // for (int f : floorTravelOrder) {
         //     System.out.println("floor " + f);

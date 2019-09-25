@@ -4,6 +4,7 @@ public class Event{
     Person p;
     Elevator e;
     int numberOfPeople;
+    int numberOfStops;
 
     Event(double time, int type, Person p){
         this.time = time;

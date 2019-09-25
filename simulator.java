@@ -17,7 +17,7 @@ public class simulator {
 }
 
 class Building {
-    final int NumberOfPersons = 1000;
+    final int NumberOfPersons = 100;
     final int NumberOfFloors = 10;
     final int MAX_ARRIVE_TIME = 900; // in seconds
 
@@ -31,7 +31,7 @@ class Building {
     // eg - interFloorDistance[i] = Distance from i-1 floor to i floor
 
     // Defining percentage of people go to each floor
-    final int[] FLOOR_WEIGHTS = { 55, 5, 5, 5, 5, 5, 5, 5, 5, 5 }; // Sum of all element should be 100
+    final int[] FLOOR_WEIGHTS = { 10, 10, 10, 10, 10,  10, 10, 10, 10, 10 }; // Sum of all element should be 100
 
     // Create elevator set
     Elevator[] elevators;
@@ -107,10 +107,10 @@ class Building {
             queue[i] = p;
         }
 
-        System.out.println("People list");
-        for (Person person : queue) {
-            System.out.println(person.id + " floor: " + person.floor + " arriveTime: " + person.arriveTime);
-        }
+        // System.out.println("People list");
+        // for (Person person : queue) {
+        //     System.out.println(person.id + " floor: " + person.floor + " arriveTime: " + person.arriveTime);
+        // }
 
         SuffleArray(queue);
 
@@ -245,12 +245,13 @@ class Building {
                                                                                             // elevator
                                                                                             // comming down
                         Event elevatorEnd = new Event(elevatorTravelEndTime, elevator_arrived, elevator);
+                        elevatorStart.numberOfStops = elevator.numberOfStops;
 
                         // Adding elevatorStart and elevatorEnd Events to Main Event List
                         sortedInsertEvent(events, elevatorStart);
                         sortedInsertEvent(events, elevatorEnd);
 
-                        System.out.println("iteration: " + i + " runTime " + elevatorTravelTime + "\n");
+                        System.out.println("iteration: " + i + " runTime " + elevatorTravelTime + " stops " + elevator.numberOfStops + "\n");
                     }
                     // }
                 }
@@ -337,9 +338,17 @@ class Building {
             // Show elevator events in event list
             if (e.e != null) {
                 String elevatorCarrySize = " ";
+                String log = "";
                 if (e.numberOfPeople != 0)
                     elevatorCarrySize = " #ofPersons: " + e.numberOfPeople;
-                System.out.println("E " + e.e.id + " " + eType + " time: " + e.time + elevatorCarrySize + " Stops: " + e.e.numberOfStops);// + " per: " +
+                if(eType.equals("eA"))
+                    log = "E " + e.e.id + " " + eType + " time: " + e.time 
+                        + elevatorCarrySize;
+                if(eType.equals("eL"))
+                    log = "E " + e.e.id + " " + eType + " time: " + e.time 
+                        + elevatorCarrySize + " Stops: " + e.numberOfStops+ " |test:" + e.e;
+
+                System.out.println(log);// + " per: " +
                                                                                                          // per + "
                                                                                                          // elevator: "
                                                                                                          // +
